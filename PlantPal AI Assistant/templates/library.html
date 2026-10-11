@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Plant Library — PlantPal{% endblock %}
+{% block page_title %}Plant Care Reference Library{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+  <p style="color: var(--text-muted); font-size: 14.5px; max-width: 720px;">
+    Explore expert care profiles for 7 popular indoor and garden varieties. 
+    Learn their light preferences, watering cadence, and common problem signs. 
+    Click <strong>"Add to My Garden"</strong> to instantly import any variety into your collection!
+  </p>
+</div>
+
+<div class="plants-grid">
+  {% for item in library_plants %}
+    <div class="card" style="display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+      <!-- Header banner with icon and difficulty badge -->
+      <div style="background: linear-gradient(135deg, #e3efe3 0%, #c9e2c9 100%); padding: 22px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: var(--shadow-sm);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22v-7"/>
+              <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+              <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+            </svg>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">{{ item.name }}</h3>
+            <div style="font-size: 12.5px; font-style: italic; color: var(--text-muted);">{{ item.species }}</div>
+          </div>
+        </div>
+        <span style="font-size: 11.5px; font-weight: 700; background: white; color: var(--primary); padding: 4px 10px; border-radius: var(--radius-full); box-shadow: var(--shadow-sm);">
+          {{ item.difficulty }}
+        </span>
+      </div>
+
+      <!-- Body Content -->
+      <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+        
+        <!-- Quick Specs -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+          <div style="background: var(--surface-hover); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700;">Sunlight</div>
+            <div style="font-weight: 600; color: var(--text-main); margin-top: 2px;">{{ item.sunlight }}</div>
+          </div>
+
+          <div style="background: var(--surface-hover); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700;">Water Every</div>
+            <div style="font-weight: 600; color: var(--text-main); margin-top: 2px;">{{ item.watering_interval_days }} Days</div>
+          </div>
+        </div>
+
+        <!-- Care Summary -->
+        <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.45;">
+          <strong>Light:</strong> {{ item.sunlight_detail }}
+        </div>
+
+        <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.45;">
+          <strong>Watering:</strong> {{ item.watering_detail }}
+        </div>
+
+        <div style="font-size: 13px; color: var(--text-main); background: #f4f8f3; padding: 10px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--sage);">
+          <strong>💡 Pro Tip:</strong> {{ item.care_tips }}
+        </div>
+
+        <div style="font-size: 12.5px; color: #855; line-height: 1.4;">
+          <strong>Watch out for:</strong> {{ item.common_issues }}
+        </div>
+
+        <!-- Add to Garden Form -->
+        <div style="margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);">
+          <form method="POST" action="{{ url_for('add_library_plant', plant_slug=item.id) }}">
+            <div style="display: flex; gap: 8px;">
+              <input type="text" name="nickname" class="form-control" style="font-size: 13px; padding: 6px 10px;"
+                     placeholder="Nickname (e.g. My {{ item.name }})" value="My {{ item.name }}">
+              <button type="submit" class="btn btn-primary btn-sm" style="white-space: nowrap;">
+                + Add to Garden
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

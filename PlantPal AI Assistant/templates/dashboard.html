@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Garden Dashboard{% endblock %}
+
+{% block content %}
+<!-- Daily Gardening Tip Banner -->
+<div class="tip-banner">
+  <div class="tip-icon">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v4"/>
+      <path d="M12 18v4"/>
+      <path d="M4.93 4.93l2.83 2.83"/>
+      <path d="M16.24 16.24l2.83 2.83"/>
+      <path d="M2 12h4"/>
+      <path d="M18 12h4"/>
+      <path d="M4.93 19.07l2.83-2.83"/>
+      <path d="M16.24 7.76l2.83-2.83"/>
+    </svg>
+  </div>
+  <div>
+    <div class="tip-title">Daily Gardening Tip</div>
+    <div class="tip-text">{{ today_tip }}</div>
+  </div>
+</div>
+
+<!-- Real Database Statistics Grid -->
+<div class="stats-grid">
+  <!-- Total Plants -->
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22v-7"/>
+        <path d="M17 8v.01"/>
+        <path d="M7 8v.01"/>
+        <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+        <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-number">{{ stats.total_plants }}</div>
+      <div class="stat-label">Total Plants</div>
+    </div>
+  </div>
+
+  <!-- Plants Due for Watering -->
+  <div class="stat-card">
+    <div class="stat-icon orange">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-number">{{ stats.due_for_watering }}</div>
+      <div class="stat-label">Watering Due</div>
+    </div>
+  </div>
+
+  <!-- Pending Tasks -->
+  <div class="stat-card">
+    <div class="stat-icon blue">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-number">{{ stats.pending_tasks }}</div>
+      <div class="stat-label">Pending Care Tasks</div>
+    </div>
+  </div>
+
+  <!-- Completed Tasks -->
+  <div class="stat-card">
+    <div class="stat-icon teal">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-number">{{ stats.completed_tasks }}</div>
+      <div class="stat-label">Completed Tasks</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Dashboard Split Sections -->
+<div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 24px;">
+  
+  <!-- Upcoming Watering Reminders -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+        Watering Schedule Reminders
+      </div>
+      <a href="{{ url_for('scheduler') }}" class="btn btn-outline btn-sm">View Full Schedule &rarr;</a>
+    </div>
+
+    {% if stats.reminders and stats.reminders|length > 0 %}
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for plant in stats.reminders %}
+          <div class="reminder-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface);">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--primary-light); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22v-7"/>
+                  <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+                  <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+                </svg>
+              </div>
+              <div>
+                <a href="{{ url_for('plant_detail', plant_id=plant.id) }}" style="font-weight: 700; color: var(--text-main); text-decoration: none;">
+                  {{ plant.name }}
+                </a>
+                <div style="font-size: 12.5px; color: var(--text-muted);">
+                  {{ plant.species }} &bull; Next: {{ plant.next_watering_date }}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="plant-status-badge badge-{{ plant.status }}">
+                {{ plant.status_label }}
+              </span>
+
+              <button type="button" class="btn btn-primary btn-sm btn-water-ajax" data-plant-id="{{ plant.id }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                Water
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: 36px 20px;">
+        <div class="empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22v-7"/>
+            <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+            <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+          </svg>
+        </div>
+        <div class="empty-title">Your garden is empty!</div>
+        <div class="empty-desc">Add your first plant or pick one from our pre-configured Plant Library.</div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <a href="{{ url_for('add_plant') }}" class="btn btn-primary btn-sm">+ Add Custom Plant</a>
+          <a href="{{ url_for('library') }}" class="btn btn-outline btn-sm">Explore Plant Library</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Quick Assistant & Challenge Card -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <!-- AI Quick Launcher Card -->
+    <div class="card" style="background: linear-gradient(135deg, #2d5a27 0%, #1e3f20 100%); color: white;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 16px;">AI Plant Doctor</div>
+          <div style="font-size: 12px; opacity: 0.85;">Powered by SmolLM2 360M</div>
+        </div>
+      </div>
+      <p style="font-size: 13.5px; opacity: 0.9; margin-bottom: 16px; line-height: 1.4;">
+        Not sure why leaves are yellow or how much light to provide? Ask our local offline mentor anytime!
+      </p>
+      <a href="{{ url_for('ai_assistant') }}" class="btn btn-secondary btn-sm" style="background: white; color: var(--primary); border: none;">
+        Open AI Chat Mentor &rarr;
+      </a>
+    </div>
+
+    <!-- Daily Challenges Progress Summary -->
+    <div class="card">
+      <div class="card-header" style="margin-bottom: 12px;">
+        <div class="card-title" style="font-size: 15px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+          </svg>
+          Daily Challenges
+        </div>
+        <a href="{{ url_for('challenges') }}" style="font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 600;">View &rarr;</a>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-muted);">
+        Progress: {{ challenges.completed_count }} of {{ challenges.total }} completed
+      </div>
+      <div class="progress-container" style="margin: 8px 0 14px;">
+        <div class="progress-fill" style="width: {{ challenges.progress_percent }}%;"></div>
+      </div>
+      <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+        Build healthy gardening habits one small observation at a time!
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

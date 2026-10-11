@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Care Tasks — PlantPal{% endblock %}
+{% block page_title %}Plant Care Tasks{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 24px; align-items: start;">
+
+  <!-- Task Creation Form Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Care Task
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('add_task') }}">
+      <div class="form-group">
+        <label class="form-label" for="title">Task Description *</label>
+        <input type="text" id="title" name="title" class="form-control" required
+               placeholder="e.g. Add liquid fertilizer, Prune dead leaves, Repot to larger pot">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="task_type">Task Type</label>
+        <select id="task_type" name="task_type" class="form-control">
+          <option value="water">Water a plant</option>
+          <option value="fertilizer">Add fertilizer / plant food</option>
+          <option value="prune">Prune yellow or dead foliage</option>
+          <option value="repot">Repot into larger container</option>
+          <option value="sunlight">Check sunlight & rotate pot</option>
+          <option value="clean">Dust and wipe leaves</option>
+          <option value="other">Other general maintenance</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="plant_id">Associated Plant (Optional)</label>
+        <select id="plant_id" name="plant_id" class="form-control">
+          <option value="">-- No specific plant (General Task) --</option>
+          {% for p in plants %}
+            <option value="{{ p.id }}">{{ p.name }} ({{ p.species }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="due_date">Due Date *</label>
+        <input type="date" id="due_date" name="due_date" class="form-control" required value="{{ today }}">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+        Add Care Task
+      </button>
+    </form>
+  </div>
+
+  <!-- Tasks List & Filter Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Tasks Checklist
+      </div>
+
+      <!-- Filter Tabs -->
+      <div style="display: flex; gap: 6px;">
+        <a href="{{ url_for('tasks', filter='all') }}" class="btn btn-sm {% if filter_status == 'all' %}btn-primary{% else %}btn-outline{% endif %}">
+          All
+        </a>
+        <a href="{{ url_for('tasks', filter='pending') }}" class="btn btn-sm {% if filter_status == 'pending' %}btn-primary{% else %}btn-outline{% endif %}">
+          Pending
+        </a>
+        <a href="{{ url_for('tasks', filter='completed') }}" class="btn btn-sm {% if filter_status == 'completed' %}btn-primary{% else %}btn-outline{% endif %}">
+          Completed
+        </a>
+      </div>
+    </div>
+
+    {% if tasks and tasks|length > 0 %}
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        {% for task in tasks %}
+          <div class="task-item {% if task.status == 'completed' %}completed{% endif %}">
+            <div class="task-left">
+              <input type="checkbox" class="task-checkbox task-toggle-checkbox"
+                     data-task-id="{{ task.id }}"
+                     {% if task.status == 'completed' %}checked{% endif %}
+                     title="Click to toggle status">
+
+              <div>
+                <div class="task-title" style="font-weight: 600; font-size: 14.5px;">{{ task.title }}</div>
+                <div style="font-size: 12.5px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; margin-top: 3px;">
+                  {% if task.plant_name %}
+                    <span style="background: var(--primary-light); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-weight: 600;">
+                      🌿 {{ task.plant_name }}
+                    </span>
+                  {% endif %}
+                  <span>Due: {{ task.due_date }}</span>
+                  {% if task.is_overdue %}
+                    <span style="color: var(--status-overdue); font-weight: 700;">(Overdue)</span>
+                  {% elif task.is_today %}
+                    <span style="color: var(--status-today); font-weight: 700;">(Today)</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" style="display: inline;"
+                    onsubmit="return confirm('Delete this task?');">
+                <button type="submit" class="btn btn-outline btn-sm" style="padding: 4px 8px; color: var(--text-muted);" title="Delete Task">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: 40px 20px;">
+        <div class="empty-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="empty-title">No tasks found</div>
+        <div class="empty-desc">You are all caught up or no tasks match this filter! Use the form to plan your plant care.</div>
+      </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

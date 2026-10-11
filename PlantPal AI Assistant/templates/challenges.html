@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Challenges — PlantPal{% endblock %}
+{% block page_title %}Daily Gardening Challenges{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h2 style="font-size: 19px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+        Nurture Your Green Thumb Daily
+      </h2>
+      <p style="font-size: 14px; color: var(--text-muted);">
+        Consistent micro-habits help your indoor sanctuary flourish. Complete these 5 simple actions today!
+      </p>
+    </div>
+
+    <div style="text-align: right;">
+      <div id="challengeProgressText" style="font-size: 15px; font-weight: 700; color: var(--primary);">
+        {{ completed_count }} of {{ total }} completed ({{ progress_percent }}%)
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-fill" id="challengeProgressFill" style="width: {{ progress_percent }}%;"></div>
+  </div>
+</div>
+
+<!-- Challenges Cards -->
+<div style="display: flex; flex-direction: column; gap: 14px;">
+  {% for ch in challenges %}
+    <div class="card challenge-card {% if ch.completed == 1 %}is-completed{% endif %}"
+         style="padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 20px; transition: all var(--transition-fast);">
+      
+      <div style="display: flex; align-items: flex-start; gap: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22v-7"/>
+            <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+            <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+          </svg>
+        </div>
+
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">{{ ch.title }}</h3>
+            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; background: var(--cream); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; color: var(--text-muted);">
+              {{ ch.category }}
+            </span>
+          </div>
+          <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.45; max-width: 650px;">
+            {{ ch.description }}
+          </p>
+          {% if ch.completed == 1 and ch.completed_date %}
+            <div style="font-size: 12px; color: var(--primary); font-weight: 600; margin-top: 4px;">
+              Completed on {{ ch.completed_date }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <button type="button"
+                class="btn {% if ch.completed == 1 %}btn-secondary{% else %}btn-outline{% endif %} btn-sm challenge-toggle-btn"
+                data-challenge-key="{{ ch.challenge_key }}">
+          {% if ch.completed == 1 %}✓ Completed{% else %}Mark as Done{% endif %}
+        </button>
+      </div>
+
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

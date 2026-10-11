@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}My Plants{% endblock %}
+{% block page_title %}My Plant Collection{% endblock %}
+
+{% block content %}
+<!-- Search and Filter Bar -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('plants') }}" style="display: flex; gap: 12px; flex: 1; flex-wrap: wrap;">
+    <div class="search-box">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" name="q" class="form-control" placeholder="Search by nickname, species, or room..." value="{{ query }}">
+    </div>
+
+    <div style="min-width: 180px;">
+      <select name="sunlight" class="form-control" onchange="this.form.submit()">
+        <option value="all" {% if selected_sunlight == 'all' %}selected{% endif %}>All Sunlight Levels</option>
+        <option value="Direct Sun" {% if selected_sunlight == 'Direct Sun' %}selected{% endif %}>Direct Sun</option>
+        <option value="Bright Indirect" {% if selected_sunlight == 'Bright Indirect' %}selected{% endif %}>Bright Indirect</option>
+        <option value="Medium Light" {% if selected_sunlight == 'Medium Light' %}selected{% endif %}>Medium Light</option>
+        <option value="Low Light" {% if selected_sunlight == 'Low Light' %}selected{% endif %}>Low Light</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+    {% if query or selected_sunlight != 'all' %}
+      <a href="{{ url_for('plants') }}" class="btn btn-outline btn-sm">Clear</a>
+    {% endif %}
+  </form>
+
+  <div>
+    <a href="{{ url_for('add_plant') }}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add New Plant
+    </a>
+  </div>
+</div>
+
+<!-- Plant Cards Grid -->
+{% if plants and plants|length > 0 %}
+  <div class="plants-grid">
+    {% for plant in plants %}
+      <div class="plant-card">
+        <div class="plant-card-cover">
+          <div class="plant-card-icon">
+            <!-- Custom Botanic SVG -->
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22v-7"/>
+              <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+              <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+            </svg>
+          </div>
+          <span class="plant-status-badge badge-{{ plant.status }}">
+            {{ plant.status_label }}
+          </span>
+        </div>
+
+        <div class="plant-card-body">
+          <h3 class="plant-title">{{ plant.name }}</h3>
+          <div class="plant-species">{{ plant.species }}</div>
+
+          <div class="plant-meta-list">
+            <div class="plant-meta-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>Location: <strong>{{ plant.location or 'Indoor' }}</strong></span>
+            </div>
+
+            <div class="plant-meta-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2"/>
+                <path d="M12 20v2"/>
+                <path d="m4.93 4.93 1.41 1.41"/>
+                <path d="m17.66 17.66 1.41 1.41"/>
+                <path d="M2 12h2"/>
+                <path d="M20 12h2"/>
+                <path d="m6.34 17.66-1.41 1.41"/>
+                <path d="m19.07 4.93-1.41 1.41"/>
+              </svg>
+              <span>Sunlight: <strong>{{ plant.sunlight }}</strong></span>
+            </div>
+
+            <div class="plant-meta-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </svg>
+              <span>Every <strong>{{ plant.watering_interval_days }} days</strong> (Next: {{ plant.next_watering_date }})</span>
+            </div>
+          </div>
+
+          <div class="plant-card-actions">
+            <button type="button" class="btn btn-primary btn-sm btn-water-ajax" data-plant-id="{{ plant.id }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </svg>
+              Water
+            </button>
+
+            <a href="{{ url_for('plant_detail', plant_id=plant.id) }}" class="btn btn-outline btn-sm">
+              Details
+            </a>
+
+            <a href="{{ url_for('edit_plant', plant_id=plant.id) }}" class="btn btn-outline btn-sm" title="Edit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22v-7"/>
+        <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1"/>
+        <path d="M12 3a9 9 0 0 1 9 9c0 3.6-2.1 6.7-5.2 8.1"/>
+      </svg>
+    </div>
+    {% if query or selected_sunlight != 'all' %}
+      <div class="empty-title">No plants match your filter</div>
+      <div class="empty-desc">Try clearing the search query or changing sunlight filters.</div>
+      <a href="{{ url_for('plants') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+    {% else %}
+      <div class="empty-title">No plants added yet</div>
+      <div class="empty-desc">Begin building your indoor sanctuary by adding your first houseplant!</div>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <a href="{{ url_for('add_plant') }}" class="btn btn-primary">+ Add New Plant</a>
+        <a href="{{ url_for('library') }}" class="btn btn-outline">Explore Plant Library</a>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}
